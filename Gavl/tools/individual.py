@@ -1,139 +1,116 @@
-"""
-In this file it is defined the class Individual.
-
-Classes:
-    :Individual: Main class.
-"""
-import uuid
-import numpy as np
+import uuid  # 引入 uuid 模塊來生成唯一識別碼
+import numpy as np  # 引入 numpy 用於進行數值計算
 
 
 class Individual:
-    """ Class  of the individuals. It has the attributes chromosome, fitness and normalized fitness.
+    """ 個體類，包含染色體、適應度和正規化適應度等屬性。
     """
 
     def __init__(self, chromosome):
-        """ Constructor.
+        """ 構造函數。
 
-        :param chromosome: (list of genes) Chromosome of the individual.
+        :param chromosome: (list of genes) 個體的染色體。
         """
         if type(chromosome) != list:
-            raise AttributeError('The chromosome must be a list of genes')
+            raise AttributeError('染色體必須是基因的列表')
         else:
-            self.chromosome = chromosome
-            self._id = str(
-                uuid.uuid4())  # Unique ID for each individual ---> It is unique because uuid uses the time component for creating this id
-            self.fitness_value = None  # This attribute will be filled when the individual is evaluated
-            self.normalized_fitness_value = None  # This attribute holds the normalized value of the fitness in comparison to the rest of the population
-            self.inverse_normalized_fitness_value = None  # This attribute holds the inverse normalized value of the fitness in comparison to the rest of the population
+            self.chromosome = chromosome  # 存儲染色體
+            self._id = str(uuid.uuid4())  # 為每個個體生成一個唯一的 ID
+            self.fitness_value = None  # 適應度值將在評估時填充
+            self.normalized_fitness_value = None  # 存儲相對於族群的正規化適應度
+            self.inverse_normalized_fitness_value = None  # 存儲相對於族群的逆正規化適應度
 
     def set_new_chromosome(self, chromosome):
-        """ Method to set a chromosome.
+        """ 設置新染色體的方法。
 
-        :param chromosome: (list of genes) Chromosome of the individual.
-        :return:
+        :param chromosome: (list of genes) 個體的染色體。
         """
         if type(chromosome) != list:
-            raise AttributeError('The chromosome must be a list of genes')
+            raise AttributeError('染色體必須是基因的列表')
         else:
-            self.chromosome = chromosome
+            self.chromosome = chromosome  # 更新染色體
 
     def set_fitness_value(self, fitness_value):
-        """ Method to set the fitness value.
+        """ 設置適應度值的方法。
 
-        :param fitness_value: (float) Fitness value.
-        :return:
+        :param fitness_value: (float) 適應度值。
         """
-        if type(fitness_value) == int or type(fitness_value) == float or type(fitness_value) == np.float64:
+        if type(fitness_value) in [int, float, np.float64]:
             self.fitness_value = fitness_value
         else:
-            raise ValueError(
-                'The fitness value must be an integer or a float. However, the received type was {}.'.format(
-                    type(fitness_value)))
+            raise ValueError('適應度值必須是整數或浮點數。接收到的類型為 {}。'.format(type(fitness_value)))
 
     def set_normalized_fitness_value(self, normalized_fitness_value):
-        """ Method to set the normalized fitness value.
+        """ 設置正規化適應度值的方法。
 
-        :param normalized_fitness_value: (float) Fitness value.
-        :return:
+        :param normalized_fitness_value: (float) 正規化適應度值。
         """
-        if type(normalized_fitness_value) == int or type(normalized_fitness_value) == float or type(
-                normalized_fitness_value) == np.float64:
+        if type(normalized_fitness_value) in [int, float, np.float64]:
             self.normalized_fitness_value = normalized_fitness_value
         else:
-            raise ValueError(
-                'The normalized fitness value must be an integer o a float. However, the received type was {}.'.format(
-                    type(normalized_fitness_value)))
+            raise ValueError('正規化適應度值必須是整數或浮點數。接收到的類型為 {}。'.format(type(normalized_fitness_value)))
 
     def set_inverse_normalized_fitness_value(self, inverse_normalized_fitness_value):
-        """ Method to set the inverse normalized fitness value.
+        """ 設置逆正規化適應度值的方法。
 
-        :param inverse_normalized_fitness_value: (float) Fitness value.
-        :return:
+        :param inverse_normalized_fitness_value: (float) 逆正規化適應度值。
         """
-        if type(inverse_normalized_fitness_value) == int or type(inverse_normalized_fitness_value) == float or type(
-                inverse_normalized_fitness_value) == np.float64:
+        if type(inverse_normalized_fitness_value) in [int, float, np.float64]:
             self.inverse_normalized_fitness_value = inverse_normalized_fitness_value
         else:
-            raise ValueError(
-                'The inverse normalized fitness value must be an integer or a float. However, the received type was {}.'.format(
-                    type(inverse_normalized_fitness_value)))
+            raise ValueError('逆正規化適應度值必須是整數或浮點數。接收到的類型為 {}。'.format(type(inverse_normalized_fitness_value)))
 
     def calculate_fitness(self, fitness):
-        """ Method to calculate the fitness of the individual.
+        """ 計算個體適應度的方法。
 
-        :param fitness: (function) Function to evaluate the fitness. Its ONLY argument is the individual's chromosome (fitness(chromosome)) and returns the value of the fitness.
-        :return:
-            * :fitness_value: (float) The fitness value
-            * It is also set the value of the attribute Individual.fitness_value to the calculated value when this method is called.
+        :param fitness: (function) 評估適應度的函數。它的唯一參數是個體的染色體 (fitness(chromosome))，返回適應度值。
         """
         try:
-            value = fitness(self.chromosome)
-            self.set_fitness_value(value)
+            value = fitness(self.chromosome)  # 計算適應度值
+            self.set_fitness_value(value)  # 設置適應度值
             return value
         except Exception as e:
-            raise (type(e))(str(e) + '\n' +
-                            "Error when calculating the fitness of an individual")
+            raise Exception(str(e) + '\n計算個體適應度時出錯')
 
     def kill_and_reset(self, chromosome):
-        """ This is a bit of a "tricky" method. If a new individual of a new generation is going to be created, it will be computationally much faster to get the object of an individual that is going to be killed and reset its values to the ones of the new individual. ---> This will be done instead of directly creating a completely new individual with the new data and stop referencing the old individual.
+        """ 重設個體的方法。如果要創建新一代的新個體，重設已有個體的值會比創建全新個體並取消引用舊個體更快。
 
-        :param chromosome: (list of genes) Chromosome of the individual.
+        :param chromosome: (list of genes) 個體的染色體。
         """
         if type(chromosome) != list:
-            raise AttributeError('The chromosome must be a list of genes')
+            raise AttributeError('染色體必須是基因的列表')
         else:
-            self.chromosome = chromosome
-            self.fitness_value = None  # This attribute will be filled when the individual is evaluated
-            self.normalized_fitness_value = None  # This attribute holds the normalized value of the fitness in comparison to the rest of the population
-            self.inverse_normalized_fitness_value = None  # This attribute holds the inverse normalized value of the fitness in comparison to the rest of the population
+            self.chromosome = chromosome  # 更新染色體
+            self.fitness_value = None  # 重設適應度值
+            self.normalized_fitness_value = None  # 重設正規化適應度值
+            self.inverse_normalized_fitness_value = None  # 重設逆正規化適應度值
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.chromosome == other.chromosome
+        return self.chromosome == other.chromosome  # 比較是否相等
 
     def __lt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.fitness < other.fitness
+        return self.fitness < other.fitness  # 比較小於
 
     def __gt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.fitness > other.fitness
+        return self.fitness > other.fitness  # 比較大於
 
     def __repr__(self):
-        return '{self.__class__.__name__}({self.chromosome})'.format(self=self)
+        return '{self.__class__.__name__}({self.chromosome})'.format(self=self)  # 定義對象的官方字串表示
 
     def __str__(self):
-        return "Chromosome: {0} \nFitness: {1}".format(self.chromosome, self.fitness_value)
+        return "Chromosome: {0} \nFitness: {1}".format(self.chromosome, self.fitness_value)  # 定義對象的字串表示，方便打印
 
     def __iter__(self):
-        return iter(self.chromosome)
+        return iter(self.chromosome)  # 允許對染色體進行迭代
 
     def __len__(self):
-        return len(self.chromosome)
+        return len(self.chromosome)  # 返回染色體的長度
 
     def __getitem__(self, pos):
-        return self.chromosome[pos]
+        return self.chromosome[pos]  # 允許索引訪問染色體
