@@ -1,4 +1,11 @@
 # 匯入 Gavl 模組，這裡需要將 'import Gavl.Gavl as Gavl' 改為 'import Gavl'，假設適當的路徑已設定
+import os, sys
+
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(parent_dir)
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
 import Gavl.Gavl as Gavl
 
 ga = Gavl.Gavl()  # 初始化遺傳演算法

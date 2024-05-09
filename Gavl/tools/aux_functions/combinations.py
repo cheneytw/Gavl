@@ -7,48 +7,46 @@ Function:
 
 
 def combinations(list_get_comb, length_combination):
-    """ Generator to get all the combinations of some length of the elements of a list.  ---> itertools.combinations goes prrrr.
-
-    :param list_get_comb: (list) List from which it is wanted to get the combination of its elements.
-    :param length_combination: (int) Length of the combinations of the elements of list_get_comb.
-    :return:
-        * :generator: Generator with the combinations of this list.
     """
-    if type(list_get_comb) != list:
-        raise TypeError(
-            "The parameter 'list_get_comb' must be a list.")
-    if type(length_combination) != int:
-        raise TypeError(
-            "The parameter 'length_combination' must be a positive integer smaller than the length of the given list.")
+    生成器，用來獲取列表元素的所有特定長度的組合。
+
+    :param list_get_comb: (list) 想要獲取元素組合的列表。
+    :param length_combination: (int) 元素組合的長度。
+    :return:
+        * :generator: 此列表的組合的生成器。
+    """
+    # 檢查輸入參數是否正確
+    if not isinstance(list_get_comb, list):
+        raise TypeError("參數 'list_get_comb' 必須是列表。")
+    if not isinstance(length_combination, int):
+        raise TypeError("參數 'length_combination' 必須是一個正整數，且小於給定列表的長度。")
     if length_combination <= 0 or length_combination > len(list_get_comb):
-        raise ValueError(
-            "The parameter 'length_combination' must be a positive integer smaller than the length of the given list.")
+        raise ValueError("參數 'length_combination' 必須是一個正整數，且小於給定列表的長度。")
 
-    # Generator to get the combinations of the indices of the list
+    # 內部生成器，用來獲取列表索引的組合
     def get_indices_combinations(sub_list_indices, max_index):
-        """ Generator that returns the combinations of the indices
+        """
+        生成器，返回索引的組合
 
-        :param sub_list_indices: (list) Sub-list from which to generate ALL the possible combinations.
-        :param max_index: (int) Maximum index.
+        :param sub_list_indices: (list) 生成所有可能組合的子列表。
+        :param max_index: (int) 最大索引。
         :return:
         """
-        if len(sub_list_indices) == 1:  # Last index of the list of indices
+        if len(sub_list_indices) == 1:  # 列表索引的最後一個元素
             for index in range(sub_list_indices[0], max_index + 1):
                 yield [index]
-        elif all([sub_list_indices[-i - 1] == max_index - i for i in
-                  range(len(sub_list_indices))]):  # The current sublist has reached the end
+        elif all([sub_list_indices[-i - 1] == max_index - i for i in range(len(sub_list_indices))]):  # 當前子列表已到達終點
             yield sub_list_indices
         else:
-            for comb in get_indices_combinations(sub_list_indices[1:],
-                                                 max_index):  # Get all the possible combinations of the sublist sub_list_indices[1:]
+            # 獲取子列表 sub_list_indices[1:] 的所有可能組合
+            for comb in get_indices_combinations(sub_list_indices[1:], max_index):
                 yield [sub_list_indices[0]] + comb
-            # Advance one position and check all possible combinations
-            new_sub_list = []
-            new_sub_list.extend([sub_list_indices[0] + i + 1 for i in range(len(sub_list_indices))])
+            # 前進一個位置，檢查所有可能的組合
+            new_sub_list = [sub_list_indices[0] + i + 1 for i in range(len(sub_list_indices))]
             for new_comb in get_indices_combinations(new_sub_list, max_index):
-                yield new_comb  # Return all the possible combinations of the new list
+                yield new_comb  # 返回新列表的所有可能組合
 
-    # Start the algorithm:
-    ini_list_indices = list(range(length_combination))
+    # 啟動演算法：
+    ini_list_indices = list(range(length_combination))  # 初始化列表索引
     for list_indices in get_indices_combinations(ini_list_indices, len(list_get_comb) - 1):
-        yield [list_get_comb[i] for i in list_indices]
+        yield [list_get_comb[i] for i in list_indices]  # 根據索引返回列表中的元素組合

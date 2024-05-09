@@ -9,178 +9,139 @@ from abc import ABC, abstractmethod
 
 
 class Population(ABC):
-    """ Class of the population.
-    """
+    """ 人口類別。 """
 
     def __init__(self):
-        """Constructor.
-
-        """
-        # Algorithm's attributes:
-        self.population = []  # When the algorithm starts it will be filled with the population. It is a list with all the individuals.
+        """ 建構子。 """
+        self.population = []  # 算法開始時將填充此列表，包含所有個體。
 
     def __set_population(self, population):
-        """ Method to set the whole passed population of individuals.
-        WARNING: This method deletes all the previous individuals of the population. If wanted to maintain the olf individuals use the method add_individual(individual).
-
-        :param population: (list of chromosomes, Individuals or Population) List of individuals or object of the class Population.
-        :return:
+        """ 設置整個傳入的人口。警告：此方法會刪除人口中的所有先前個體。如果想保留舊個體，請使用 add_individual 方法。
+        :param population: 個體或人口類的物件列表。
+        :return: 無
         """
         try:
-            if type(population) == list and False not in [type(ind) == list for ind in
-                                                          population]:  # If the passed object is a list of chromosomes
-                self.population = []  # Reset the population
+            if isinstance(population, list) and all(isinstance(ind, list) for ind in population):  # 如果傳入的對象是染色體列表
+                self.population = []  # 重設人口
                 for individual in population:
                     self.add_individual(individual)
-            elif type(population) == list and False not in [type(ind) == Individual for ind in
-                                                            population]:  # If the passed object is a list of Individuals
+            elif isinstance(population, list) and all(isinstance(ind, Individual) for ind in population):  # 如果傳入的對象是個體列表
                 self.population = population
-            elif type(population) == Population and False not in [type(ind) == Individual for ind in population]:  # If it is passed an object of the class Population.
+            elif isinstance(population, Population) and all(isinstance(ind, Individual) for ind in population.population):  # 如果傳入的是人口類的對象
                 self.population = population.population
             else:
                 raise ValueError()
         except ValueError:
-            raise ValueError(
-                'The population must be a list of individuals of the class Individual or a list of chromosomes.')  # There has been an error
+            raise ValueError('人口必須是個體類的個體列表或染色體列表。')
         except Exception as e:
-            raise (type(e))(
-                str(
-                    e) + '\n' + 'The population must be a list of individuals of the class Individual or a Population object.')  # There has been an error
+            raise Exception(str(e) + '\n' + '人口必須是個體類的個體列表或人口對象。')
 
     def __kill_and_reset_whole_population(self, new_population):
-        """ This is a bit of a "tricky" method. If a new population of individuals of a new generation is going to be created, it will be computationally much faster to get the objects of the actual individuals that are already in the population and that are going to be killed and reset their values to the ones of the new population. ---> This will be done instead of directly creating a completely population of new individuals with the new data and stop referencing the individuals of the old population.
-
-        :param new_population: (list of chromosomes, Individuals or Population) List of individuals or object of the class Population.
-        :return:
+        """ 這是一個稍微複雜的方法。如果要創建一個新一代的人口，直接使用現有個體的對象重設其值會更快。
+        :param new_population: 個體或人口類的物件列表。
+        :return: 無
         """
         if not hasattr(new_population, '__len__'):
-            ValueError(
-                'The passed argument must be a list of chromosomes, Individuals (class Individual) or a whole Population.')
+            raise ValueError('傳入的參數必須是染色體列表、個體（Individual類）或完整的人口。')
         elif len(self.population) != len(new_population):
-            raise ValueError(
-                'The new population must have the same number of individuals than the existing one. Note that the current population has {} individuals.'.format(
-                    len(self.population)))
+            raise ValueError('新人口必須與現有人口有相同的個體數量。當前人口中有 {} 個個體。'.format(len(self.population)))
         else:
             try:
-                if type(new_population) == list and False not in [type(ind) == list for ind in
-                                                                  new_population]:  # If the passed object is a list of chromosomes
+                if isinstance(new_population, list) and all(isinstance(ind, list) for ind in new_population):  # 如果傳入的是染色體列表
                     for i in range(len(self.population)):
                         self.population[i].kill_and_reset(new_population[i])
-                elif type(new_population) == list and False not in [type(ind) == Individual for ind in
-                                                                    new_population]:  # If the passed object is a list of Individuals
+                elif isinstance(new_population, list) and all(isinstance(ind, Individual) for ind in new_population):  # 如果傳入的是個體列表
                     for i in range(len(self.population)):
                         self.population[i].kill_and_reset(new_population[i].chromosome)
-                elif type(new_population) == Population and False not in [type(ind) == Individual for ind in new_population]:  # If it is passed an object of the class Population.
+                elif isinstance(new_population, Population) and all(isinstance(ind, Individual) for ind in new_population.population):  # 如果傳入的是人口類對象
                     for i in range(len(self.population)):
                         self.population[i].kill_and_reset(new_population[i].chromosome)
                 else:
                     raise ValueError()
             except ValueError:
-                raise ValueError(
-                    'The population must be a list of individuals of the class Individual or a list of chromosomes.')  # There has been an error
+                raise ValueError('人口必須是個體類的個體列表或染色體列表。')
             except Exception as e:
-                raise (type(e))(
-                    str(
-                        e) + '\n' + 'The population must be a list of individuals of the class Individual or a Population object.')  # There has been an error
+                raise Exception(str(e) + '\n' + '人口必須是個體類的個體列表或人口對象。')
 
     def add_individual(self, individual):
-        """ Method to add a new individual to the population. BEWARE: The population may have a bigger size than the specified if new individuals are added.
-
-        :param individual: (Individual or list) individual of the class Individual or list representing the chromosome.
-        :return:
+        """ 向人口中添加新個體。注意：如果添加新個體，人口可能會超過指定大小。
+        :param individual: 個體類的個體或表示染色體的列表。
+        :return: 無
         """
-        if type(individual) == list:
-            new_ind = Individual(individual)
-            self.population.append(new_ind)
-        elif type(individual) == Individual:
-            self.population.append(individual)
+        if isinstance(individual, list):
+            new_ind = Individual(individual)  # 創建新個體
+            self.population.append(new_ind)  # 添加到人口
+        elif isinstance(individual, Individual):
+            self.population.append(individual)  # 直接添加到人口
         else:
-            raise ValueError(
-                'The argument Individual must be of the class Individual or a list representing the chromosome.')
+            raise ValueError('參數必須是個體類的個體或代表染色體的列表。')
 
     def get_individual_by_id(self, id_individual):
-        """ This method returns an Individual given its ID. If there is no Individual with this ID in the population, it returns None.
-
-        :param id_individual: (str) ID of the individual.
-        :return:
-            * :individual: (Individual) Individual whose id is id_individual.
+        """ 通過ID返回個體。如果沒有這個ID的個體，返回None。
+        :param id_individual: 個體的ID。
+        :return: 找到的個體或None
         """
-        if type(id_individual) != str:
-            raise ValueError('This method MUST receive the id of the individual, which is a ')
+        if not isinstance(id_individual, str):
+            raise ValueError('此方法必須接收個體的ID，該ID是字符串。')
         else:
             for individual in self.population:
                 if individual._id == id_individual:
                     return individual
-            return None  # No individual with that id has been found
+            return None  # 沒有找到該ID的個體
 
     def __calculate_normalized_fitness(self):
-        """ This method calculates the normalized fitness of the whole population (and it adds the parameter to each individual (to the attribute normalized_fitness)). The same is done with the inverse normalize fitness.
+        """ 計算整個人口的標準化適應度（並將參數添加到每個個體的屬性normalized_fitness）。同樣的操作也適用於反向標準化適應度。
         """
-        if True in [ind.fitness_value is None for ind in self]:
-            self.__calculate_fitness_population()  # Calculate the fitness of the individuals
-        max_v = max([ind.fitness_value for ind in self])
-        min_v = min([ind.fitness_value for ind in self])
-        if max_v != min_v:  # There is no 0-division
+        if any(ind.fitness_value is None for ind in self):
+            self.__calculate_fitness_population()  # 計算個體的適應度
+        max_v = max(ind.fitness_value for ind in self)
+        min_v = min(ind.fitness_value for ind in self)
+        if max_v != min_v:  # 避免除零錯誤
             for ind in self.population:
-                normalized_fitness_value = (ind.fitness_value - min_v) / (max_v - min_v)
-                ind.set_inverse_normalized_fitness_value(1 - normalized_fitness_value)
-                ind.set_normalized_fitness_value(normalized_fitness_value)
-        else:  # There would be 0-division ---> In this generation the whole population has converged to the same fitness value.
+                normalized_fitness_value = (ind.fitness_value - min_v) / (max_v - min_v)  # 計算標準化適應度
+                ind.set_inverse_normalized_fitness_value(1 - normalized_fitness_value)  # 設置反向標準化適應度
+                ind.set_normalized_fitness_value(normalized_fitness_value)  # 設置標準化適應度
+        else:  # 如果所有個體的適應度相同
             for ind in self.population:
-                ind.set_inverse_normalized_fitness_value(1)
-                ind.set_normalized_fitness_value(1)
+                ind.set_inverse_normalized_fitness_value(1)  # 設置反向標準化適應度為1
+                ind.set_normalized_fitness_value(1)  # 設置標準化適應度為1
 
     @abstractmethod
     def __calculate_fitness_population(self):
-        """ This method calculates the fitness of all the individuals of the population and then it sets this attribute to each individual.
-        """
+        """ 計算人口中所有個體的適應度並設置這個屬性給每個個體。 """
         pass
 
     @abstractmethod
     def __generate_population(self):
-        """ This method should generate a new population and add it to the attribute population.
-        """
+        """ 生成一個新的人口並將其添加到屬性人口中。 """
         pass
 
     @abstractmethod
     def __sort_population(self):
-        """ This method orders the population by its fitness.
-        """
+        """ 按其適應度對人口進行排序。 """
         pass
 
     def __calculate_fitness_and_sort(self):
-        """ This method is called to calculate the fitness of the whole population, then calculate the normalized fitness and then sort the population according to this fitness.
-        """
-        self.__calculate_fitness_population()
-        self.__calculate_normalized_fitness()
-        self.__sort_population()
+        """ 計算整個人口的適應度，然後計算標準化適應度，然後根據這個適應度對人口進行排序。 """
+        self.__calculate_fitness_population()  # 計算適應度
+        self.__calculate_normalized_fitness()  # 計算標準化適應度
+        self.__sort_population()  # 排序人口
 
     @abstractmethod
     def __get_next_generation(self):
-        """ This method is used to calculate the next generation.
-
-        :return:
-            * :population: (list of individuals) It returns the next generation.
-        """
+        """ 用於計算下一代。 """
         pass
 
     @abstractmethod
     def best_individual(self):
-        """ This method returns the best individual.
-
-        :return:
-            * :individual: (Individual) Best individual.
-        """
+        """ 返回最佳個體。 """
         pass
 
     def get_population(self):
-        """ Method to get the population
-
-        :return:
-        """
-        self.__calculate_fitness_population()
-        self.__calculate_normalized_fitness()
-        self.__sort_population()
+        """ 獲取人口的方法。 """
+        self.__calculate_fitness_population()  # 計算適應度
+        self.__calculate_normalized_fitness()  # 計算標準化適應度
+        self.__sort_population()  # 排序人口
         return self.population
 
     def __len__(self):
